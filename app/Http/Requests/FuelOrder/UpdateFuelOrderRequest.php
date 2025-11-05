@@ -1,0 +1,27 @@
+<?php
+
+namespace App\Http\Requests\FuelOrder;
+
+use Illuminate\Foundation\Http\FormRequest;
+
+class UpdateFuelOrderRequest extends FormRequest
+{
+    public function authorize(): bool
+    {
+        return true;
+    }
+
+    public function rules(): array
+    {
+        return [
+            'driver_id' => 'sometimes|required|integer|exists:drivers,id',
+            'station_id' => 'sometimes|required|integer|exists:stations,id',
+            'product_id' => 'sometimes|required|integer|exists:products,id',
+            'order_status_id' => 'sometimes|required|integer|exists:order_statuses,id',
+            'quantity' => 'sometimes|nullable|numeric|min:0',
+            'order_date' => 'sometimes|required|date',
+            'delivery_date' => 'sometimes|nullable|date|after_or_equal:order_date',
+            'notes' => 'sometimes|nullable|string',
+        ];
+    }
+}
