@@ -12,7 +12,14 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        // --- [بداية الإضافة] ---
+        // هذا السطر يخبر Laravel بتعطيل حماية CSRF
+        // لجميع المسارات التي تبدأ بـ /api/
+        // لأن الـ API يستخدم مصادقة Sanctum (Bearer Token) بدلاً من الجلسات.
+        $middleware->validateCsrfTokens(except: [
+            'api/*',
+        ]);
+        // --- [نهاية الإضافة] ---
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
