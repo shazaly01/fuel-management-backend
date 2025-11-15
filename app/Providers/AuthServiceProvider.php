@@ -27,6 +27,8 @@ use App\Models\OrderStatus; // <-- [جديد]
 use App\Policies\OrderStatusPolicy; // <-- [جديد]
 use App\Models\Region; // <-- إضافة استيراد
 use App\Policies\RegionPolicy; // <-- إضافة استيراد
+use App\Models\WorkNature;
+use App\Policies\WorkNaturePolicy;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -39,6 +41,7 @@ class AuthServiceProvider extends ServiceProvider
         // تسجيل الـ Policies التي كانت موجودة
         Company::class => CompanyPolicy::class,
         Station::class => StationPolicy::class,
+        WorkNature::class => WorkNaturePolicy::class,
         Driver::class => DriverPolicy::class,
         Truck::class => TruckPolicy::class,
         Product::class => ProductPolicy::class,

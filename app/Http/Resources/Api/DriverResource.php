@@ -20,8 +20,19 @@ class DriverResource extends JsonResource
             'license_number' => $this->license_number,
             'phone_number' => $this->phone_number,
             'status' => $this->status,
+            // --- بداية الإضافة ---
+            'address' => $this->address,
+            // --- نهاية الإضافة ---
+
+            'document_image_url' => $this->document_image_url,
             // تحميل بيانات الشاحنة المرتبطة بالسائق، فقط إذا تم تحميلها مسبقاً
             'truck' => TruckResource::make($this->whenLoaded('truck')),
+
+            // --- بداية الإضافة ---
+            // تحميل بيانات طبيعة العمل المرتبطة بالسائق، فقط إذا تم تحميلها مسبقاً
+            'work_nature' => WorkNatureResource::make($this->whenLoaded('workNature')),
+            // --- نهاية الإضافة ---
+            'fuel_orders_count' => $this->whenCounted('fuelOrders'),
         ];
     }
 }

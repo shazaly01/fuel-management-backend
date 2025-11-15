@@ -22,6 +22,7 @@ class StoreFuelOrderRequest extends FormRequest
             'order_date' => 'required|date',
             'delivery_date' => 'nullable|date|after_or_equal:order_date',
             'notes' => 'nullable|string',
+            'notification_number' => 'nullable|string|max:255',
         ];
     }
 }

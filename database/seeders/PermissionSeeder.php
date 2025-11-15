@@ -27,6 +27,7 @@ class PermissionSeeder extends Seeder
             'role.view', 'role.create', 'role.update', 'role.delete',
             'company.view', 'company.create', 'company.update', 'company.delete',
             'station.view', 'station.create', 'station.update', 'station.delete',
+            'work_nature.view', 'work_nature.create', 'work_nature.update', 'work_nature.delete',
             'driver.view', 'driver.create', 'driver.update', 'driver.delete',
             'truck.view', 'truck.create', 'truck.update', 'truck.delete',
             'product.view', 'product.create', 'product.update', 'product.delete',
@@ -34,6 +35,7 @@ class PermissionSeeder extends Seeder
             'fuel_order.view', 'fuel_order.create', 'fuel_order.update', 'fuel_order.delete',
             'setting.view', 'setting.update',
             'order_status.view', 'order_status.create', 'order_status.update', 'order_status.delete',
+
         ];
 
         // إنشاء الصلاحيات مع تحديد الحارس
@@ -71,6 +73,7 @@ class PermissionSeeder extends Seeder
                                           'fuel_order.delete',
                                           'order_status.delete',
                                           'region.delete',
+                                          'work_nature.delete',
                                       ])->pluck('name');
         $adminRole->givePermissionTo($adminPermissions);
 

@@ -22,6 +22,7 @@ class UpdateFuelOrderRequest extends FormRequest
             'order_date' => 'sometimes|required|date',
             'delivery_date' => 'sometimes|nullable|date|after_or_equal:order_date',
             'notes' => 'sometimes|nullable|string',
+            'notification_number' => 'nullable|string|max:255',
         ];
     }
 }

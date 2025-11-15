@@ -16,6 +16,7 @@ use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\OrderStatusController;
 use App\Http\Controllers\Api\RegionController;
+use App\Http\Controllers\Api\WorkNatureController;
 
 /*
 |--------------------------------------------------------------------------
@@ -53,6 +54,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('users', UserController::class);
     Route::apiResource('companies', CompanyController::class);
     Route::apiResource('stations', StationController::class);
+    Route::apiResource('work-natures', WorkNatureController::class);
     Route::apiResource('drivers', DriverController::class);
     Route::apiResource('regions', RegionController::class);
     Route::apiResource('products', ProductController::class);
@@ -63,6 +65,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('reports')->name('reports.')->group(function () {
         Route::get('/drivers', [ReportController::class, 'driverReport'])->name('drivers')->middleware('can:viewAny,' . \App\Models\Driver::class);
         Route::get('/orders', [ReportController::class, 'orderReport'])->name('orders')->middleware('can:viewAny,' . \App\Models\FuelOrder::class);
+        Route::get('/movement-order', [ReportController::class, 'movementOrderReport'])->name('movement-order')->middleware('can:viewAny,' . \App\Models\FuelOrder::class); // استخدام نفس صلاحية تقرير الطلبيات
         Route::get('/stations', [ReportController::class, 'stationReport'])->name('stations')->middleware('can:viewAny,' . \App\Models\Station::class);
     });
 

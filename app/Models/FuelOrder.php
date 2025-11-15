@@ -20,6 +20,7 @@ class FuelOrder extends Model
         'order_date',
         'delivery_date',
         'notes',
+        'notification_number',
     ];
 
     /**

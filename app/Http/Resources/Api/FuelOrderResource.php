@@ -20,6 +20,7 @@ class FuelOrderResource extends JsonResource
             'order_date' => $this->order_date->format('Y-m-d'), // تنسيق التاريخ
             'delivery_date' => $this->delivery_date?->format('Y-m-d H:i:s'), // استخدام Null-safe operator
             'notes' => $this->notes,
+            'notification_number' => $this->notification_number,
             'created_at' => $this->created_at->toDateTimeString(),
 
             // تضمين البيانات من العلاقات المرتبطة

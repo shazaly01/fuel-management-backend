@@ -12,19 +12,19 @@ class UserSeeder extends Seeder
         // إنشاء مستخدم Super Admin
         $superAdmin = User::create([
             'full_name' => 'Super Admin',
-            'username' => 'superadmin',
+            'username' => 'admin',
             'email' => 'superadmin@app.com',
-            'password' => bcrypt('password'), // استخدم كلمة مرور قوية في التطبيق الفعلي
+            'password' => bcrypt('12345678'), // استخدم كلمة مرور قوية في التطبيق الفعلي
         ]);
 
-        $superAdmin->assignRole('Super Admin');
+        $superAdmin->assignRole('Admin');
 
         // إنشاء مستخدم عادي (مثال)
         $user = User::create([
             'full_name' => 'Normal User',
             'username' => 'user',
             'email' => 'user@app.com',
-            'password' => bcrypt('password'),
+            'password' => bcrypt('12345678'),
         ]);
 
         $user->assignRole('User');

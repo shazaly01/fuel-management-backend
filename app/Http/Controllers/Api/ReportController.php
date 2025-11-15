@@ -225,4 +225,56 @@ class ReportController extends Controller
         return new DashboardStatsResource($stats);
         // --- نهاية التعديل ---
     }
+
+
+
+    // ... (الدوال الحالية مثل dashboardStats, driverReport, etc.)
+
+    /**
+     * Generate a daily movement order report for a specific company.
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function movementOrderReport(Request $request)
+    {
+        // 1. التحقق من صحة المدخلات
+        $validated = $request->validate([
+            'date' => 'required|date_format:Y-m-d',
+            'company_id' => 'required|integer|exists:companies,id',
+        ]);
+
+        $reportDate = Carbon::parse($validated['date']);
+        $companyId = $validated['company_id'];
+
+        // 2. حساب "رقم أمر الحركة" الفريد
+        // الصيغة: COMPANY_ID - YYMMDD
+        $referenceNumber = sprintf('%d-%s', $companyId, $reportDate->format('ymd'));
+
+        // 3. جلب بيانات الشركة
+        $company = Company::findOrFail($companyId);
+
+        // 4. جلب الطلبيات التي تطابق الشروط
+        $orders = FuelOrder::query()
+            ->with(['driver.truck', 'station', 'product']) // تحميل العلاقات اللازمة
+            ->whereDate('order_date', $reportDate) // فلترة حسب التاريخ المحدد
+            ->whereHas('station', function ($query) use ($companyId) {
+                $query->where('company_id', $companyId); // فلترة حسب الشركة
+            })
+            ->orderBy('id', 'asc') // ترتيب الطلبيات تصاعديًا حسب رقمها التسلسلي في اليوم
+            ->get();
+
+        // 5. إرجاع كل البيانات في استجابة JSON واحدة
+        return response()->json([
+            'data' => [
+                'report_date' => $reportDate->format('Y-m-d'),
+                'reference_number' => $referenceNumber,
+                'company' => [
+                    'name' => $company->name,
+                    // يمكنك إضافة أي بيانات أخرى عن الشركة هنا إذا احتجت
+                ],
+                'orders' => FuelOrderResource::collection($orders),
+            ]
+        ]);
+    }
 }

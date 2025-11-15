@@ -46,13 +46,13 @@ class FuelOrderController extends Controller
         // 4. تحديد طريقة إرجاع النتائج
         if ($request->boolean('printable')) {
             // إذا كان الطلب للطباعة، أرجع كل النتائج بدون ترقيم صفحات
-            $orders = $query->latest('order_date')->get();
-            // في هذه الحالة، نرجع استجابة JSON مباشرة لأنها لا تحتوي على بيانات meta للترقيم
+            // تم تغيير الترتيب من 'order_date' إلى 'id' تنازليًا
+            $orders = $query->orderBy('id', 'desc')->get();
             return response()->json(['data' => FuelOrderResource::collection($orders)]);
         } else {
             // في الحالة العادية، أرجع النتائج مع ترقيم الصفحات
-            $orders = $query->latest('order_date')->paginate(15)->withQueryString();
-            // نرجع الـ Resource Collection مباشرة لأنه يعالج بيانات الترقيم
+            // تم تغيير الترتيب من 'order_date' إلى 'id' تنازليًا
+            $orders = $query->orderBy('id', 'desc')->paginate(15)->withQueryString();
             return FuelOrderResource::collection($orders);
         }
         // --- [نهاية التعديل الدقيق هنا] ---
