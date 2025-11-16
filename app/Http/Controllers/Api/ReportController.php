@@ -173,60 +173,58 @@ class ReportController extends Controller
 
 
 
-     /**
-     * Get aggregated statistics for the main dashboard.
-     *
-     * @return DashboardStatsResource // <-- تحديث نوع الإرجاع
-     */
-    public function dashboardStats(): DashboardStatsResource // <-- تحديث نوع الإرجاع
-    {
-        $this->authorize('dashboard.view');
+   /**
+ * Get aggregated statistics for the main dashboard.
+ *
+ * @return DashboardStatsResource
+ */
+public function dashboardStats(): DashboardStatsResource
+{
+    $this->authorize('dashboard.view');
 
-        $stats = Cache::remember('dashboard_stats', now()->addMinutes(5), function () {
-            // ... (نفس كود الاستعلامات من الخطوة السابقة) ...
-           $orderStats = OrderStatus::withCount('fuelOrders')
-    ->get()
-    ->map(function ($status) {
+    $stats = Cache::remember('dashboard_stats', now()->addMinutes(5), function () {
+
+        // --- [بداية الإصلاح هنا] ---
+        $orderStats = OrderStatus::withCount('fuelOrders')
+            ->get()
+            ->map(function ($status) {
+                return [
+                    'id' => $status->id,
+                    'name' => $status->name,
+                    'color' => $status->color, // <-- السطر الحاسم: إضافة حقل اللون
+                    'count' => $status->fuel_orders_count,
+                ];
+            });
+        // --- [نهاية الإصلاح هنا] ---
+
+        $driverStats = Driver::query()
+            ->selectRaw("
+                COUNT(id) as total,
+                SUM(CASE WHEN status = 'available' THEN 1 ELSE 0 END) as available,
+                SUM(CASE WHEN status = 'on_trip' THEN 1 ELSE 0 END) as on_trip
+            ")
+            ->first();
+
+        $generalCounts = [
+            'users' => \App\Models\User::count(),
+            'companies' => \App\Models\Company::count(),
+            'stations' => \App\Models\Station::count(),
+            'trucks' => \App\Models\Truck::count(),
+        ];
+
         return [
-            'id' => $status->id,
-            'name' => $status->name,
-            'count' => $status->fuel_orders_count,
+            'general' => $generalCounts,
+            'drivers' => [
+                'total' => (int) $driverStats->total,
+                'available' => (int) $driverStats->available,
+                'on_trip' => (int) $driverStats->on_trip,
+            ],
+            'orders' => $orderStats,
         ];
     });
 
-
-            $driverStats = Driver::query()
-                ->selectRaw("
-                    COUNT(id) as total,
-                    SUM(CASE WHEN status = 'available' THEN 1 ELSE 0 END) as available,
-                    SUM(CASE WHEN status = 'on_trip' THEN 1 ELSE 0 END) as on_trip
-                ")
-                ->first();
-
-            $generalCounts = [
-                'users' => User::count(),
-                'companies' => Company::count(),
-                'stations' => Station::count(),
-                'trucks' => Truck::count(),
-            ];
-
-            return [
-                'general' => $generalCounts,
-                'drivers' => [
-                    'total' => (int) $driverStats->total,
-                    'available' => (int) $driverStats->available,
-                    'on_trip' => (int) $driverStats->on_trip,
-                ],
-                'orders' => $orderStats,
-            ];
-        });
-
-        // --- بداية التعديل: استخدام الـ Resource ---
-        return new DashboardStatsResource($stats);
-        // --- نهاية التعديل ---
-    }
-
-
+    return new DashboardStatsResource($stats);
+}
 
     // ... (الدوال الحالية مثل dashboardStats, driverReport, etc.)
 
