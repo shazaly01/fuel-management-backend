@@ -11,6 +11,8 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 use App\Http\Resources\Api\TruckResource;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+// [الإصلاح الحاسم هنا] تصحيح مسار استيراد كلاس Request
+use Illuminate\Http\Request;
 
 class TruckController extends Controller
 {
@@ -24,16 +26,38 @@ class TruckController extends Controller
         $this->authorizeResource(Truck::class, 'truck');
     }
 
-  /**
+    /**
      * Display a listing of the resource.
-     * @return AnonymousResourceCollection // <-- تعديل
+     * @param Request $request
+     * @return AnonymousResourceCollection
      */
-    public function index(): AnonymousResourceCollection // <-- تعديل
+    public function index(Request $request): AnonymousResourceCollection
     {
-        // eager load the driver relationship
-        $trucks = Truck::with('driver')->latest()->paginate(15);
-        return TruckResource::collection($trucks); // <-- تعديل
+        // ابدأ ببناء الاستعلام مع تحميل علاقة السائق
+        $query = Truck::with('driver');
+
+        // تطبيق الفلاتر بشكل ديناميكي
+        // الفلترة برقم الشاحنة
+        $query->when($request->filled('truck_number'), function ($q) use ($request) {
+            return $q->where('truck_number', 'like', '%' . $request->input('truck_number') . '%');
+        });
+
+        // الفلترة برقم المقطورة
+        $query->when($request->filled('trailer_number'), function ($q) use ($request) {
+            return $q->where('trailer_number', 'like', '%' . $request->input('trailer_number') . '%');
+        });
+
+        // الفلترة بمعرّف السائق
+        $query->when($request->filled('driver_id'), function ($q) use ($request) {
+            return $q->where('driver_id', $request->input('driver_id'));
+        });
+
+        // ترتيب النتائج حسب الأحدث وتقسيمها إلى صفحات مع الحفاظ على الفلاتر
+        $trucks = $query->latest()->paginate(15)->withQueryString();
+
+        return TruckResource::collection($trucks);
     }
+
     /**
      * Store a newly created resource in storage.
      */

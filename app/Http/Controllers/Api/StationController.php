@@ -10,6 +10,7 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 use App\Http\Resources\Api\StationResource;
+use Illuminate\Http\Request; // [إضافة] استيراد كلاس Request
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class StationController extends Controller
@@ -26,16 +27,41 @@ class StationController extends Controller
 
     /**
      * Display a listing of the resource.
+     * @param Request $request
      * @return AnonymousResourceCollection
      */
-    public function index(): AnonymousResourceCollection
+    public function index(Request $request): AnonymousResourceCollection
     {
-        // [تم التعديل هنا]
-        // تحميل علاقتي الشركة والمنطقة لتجنب مشكلة N+1
-        $stations = Station::with(['company', 'region'])->latest()->paginate(15);
+        // ابدأ ببناء الاستعلام مع تحميل العلاقات
+        $query = Station::with(['company', 'region']);
+
+        // [تصحيح] استخدام filled() و input() لتطبيق الفلاتر بشكل صحيح
+        // الفلترة بالاسم
+        $query->when($request->filled('name'), function ($q) use ($request) {
+            return $q->where('name', 'like', '%' . $request->input('name') . '%');
+        });
+
+        // الفلترة برقم المحطة
+        $query->when($request->filled('station_number'), function ($q) use ($request) {
+            return $q->where('station_number', 'like', '%' . $request->input('station_number') . '%');
+        });
+
+        // الفلترة بمعرّف الشركة
+        $query->when($request->filled('company_id'), function ($q) use ($request) {
+            return $q->where('company_id', $request->input('company_id'));
+        });
+
+        // الفلترة بمعرّف المنطقة
+        $query->when($request->filled('region_id'), function ($q) use ($request) {
+            return $q->where('region_id', $request->input('region_id'));
+        });
+
+        // [تصحيح] استخدام withQueryString() لترقيم الصفحات
+        $stations = $query->latest()->paginate(15)->withQueryString();
 
         return StationResource::collection($stations);
     }
+
 
     /**
      * Store a newly created resource in storage.
@@ -45,7 +71,7 @@ class StationController extends Controller
         $station = Station::create($request->validated());
         return response()->json([
             'message' => 'Station created successfully.',
-            'data' => StationResource::make($station->load('company')),
+            'data' => StationResource::make($station->load('company', 'region')), // تم إضافة region هنا أيضاً
         ], Response::HTTP_CREATED);
     }
 
@@ -54,7 +80,8 @@ class StationController extends Controller
      */
      public function show(Station $station): JsonResponse
     {
-        return response()->json(StationResource::make($station->load('company')));
+        // تم إضافة region هنا أيضاً
+        return response()->json(StationResource::make($station->load('company', 'region')));
     }
 
     /**
@@ -65,7 +92,8 @@ class StationController extends Controller
         $station->update($request->validated());
         return response()->json([
             'message' => 'Station updated successfully.',
-            'data' => StationResource::make($station->fresh()->load('company')),
+            // تم إضافة region هنا أيضاً
+            'data' => StationResource::make($station->fresh()->load('company', 'region')),
         ]);
     }
 

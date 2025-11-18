@@ -45,6 +45,10 @@ class DriverController extends Controller
             });
         });
 
+         $query->when($request->input('license_number'), function ($q, $licenseNumber) {
+            $q->where('license_number', 'like', "%{$licenseNumber}%");
+        });
+
         // 5. تطبيق فلتر الحالة (Status) إذا كان موجودًا
         $query->when($request->input('status'), function ($q, $status) {
             $q->where('status', $status);

@@ -15,6 +15,7 @@ class TruckResource extends JsonResource
             'truck_type' => $this->truck_type,
             'color' => $this->color,
             'trailer_number' => $this->trailer_number,
+            'driver' => DriverResource::make($this->whenLoaded('driver')),
             // لا نقم بتضمين علاقة السائق هنا لتجنب التكرار اللانهائي (driver -> truck -> driver)
             // سنعرض فقط driver_id
             'driver_id' => $this->driver_id,
