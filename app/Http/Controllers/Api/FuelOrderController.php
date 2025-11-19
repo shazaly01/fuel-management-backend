@@ -42,6 +42,9 @@ class FuelOrderController extends Controller
         $query->when($request->filled('start_date'), fn($q) => $q->whereDate('order_date', '>=', Carbon::parse($request->input('start_date'))));
         $query->when($request->filled('end_date'), fn($q) => $q->whereDate('order_date', '<=', Carbon::parse($request->input('end_date'))));
 
+         $query->when($request->filled('notification_number'), function ($q) use ($request) {
+            $q->where('notification_number', 'like', '%' . $request->input('notification_number') . '%');
+        });
         // --- [بداية التعديل الدقيق هنا] ---
         // 4. تحديد طريقة إرجاع النتائج
         if ($request->boolean('printable')) {
