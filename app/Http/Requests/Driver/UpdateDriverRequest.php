@@ -24,7 +24,7 @@ class UpdateDriverRequest extends FormRequest
                 Rule::unique('drivers', 'license_number')->ignore($this->driver),
             ],
             'phone_number' => 'nullable|string|max:20',
-            'status' => 'sometimes|required|string|in:available,on_trip,unavailable',
+            'status' => 'sometimes|required|string|in:available,on_trip,unavailable,wants_to_work',
             // --- بداية الإضافة ---
             'address' => 'nullable|string|max:255',
             'work_nature_id' => 'nullable|integer|exists:work_natures,id',
