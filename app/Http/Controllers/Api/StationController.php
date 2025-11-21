@@ -56,8 +56,11 @@ class StationController extends Controller
             return $q->where('region_id', $request->input('region_id'));
         });
 
-        // [تصحيح] استخدام withQueryString() لترقيم الصفحات
-        $stations = $query->latest()->paginate(15)->withQueryString();
+        // 1. احصل على قيمة 'per_page' من الطلب، وإذا لم تكن موجودة، استخدم 15 كقيمة افتراضية.
+        $perPage = $request->input('per_page', 15);
+
+        // 2. استخدم المتغير $perPage في دالة paginate بدلاً من الرقم الثابت.
+        $stations = $query->latest()->paginate($perPage)->withQueryString();
 
         return StationResource::collection($stations);
     }
