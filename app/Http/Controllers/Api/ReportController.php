@@ -24,7 +24,8 @@ use App\Http\Resources\Api\DashboardStatsResource;
 
 class ReportController extends Controller
 {
-       /**
+
+   /**
      * Generate a complete report for drivers with advanced filtering.
      *
      * @param Request $request
@@ -59,14 +60,17 @@ class ReportController extends Controller
             }
         }
 
-        // 4. جلب كل النتائج المفلترة وترتيبها
+        // 4. جلب النتائج وترتيبها مع إضافة ترقيم الصفحات
         // --- [تم التعديل هنا] ---
-        $drivers = $query->latest()->get();
+        // احصل على عدد العناصر المطلوبة لكل صفحة من الطلب، مع قيمة افتراضية 15
+        $perPage = $request->input('per_page', 15);
+
+        // استخدم paginate() بدلاً من get(). إذا كانت per_page = -1، جلب كل النتائج.
+        $drivers = $query->latest()->paginate($perPage == -1 ? $query->count() : $perPage);
         // --- [نهاية التعديل] ---
 
         return DriverResource::collection($drivers);
     }
-
 
 
     /**
