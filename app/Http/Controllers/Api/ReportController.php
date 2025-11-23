@@ -24,8 +24,8 @@ use App\Http\Resources\Api\DashboardStatsResource;
 
 class ReportController extends Controller
 {
-    /**
-     * Generate a report for drivers with advanced filtering.
+       /**
+     * Generate a complete report for drivers with advanced filtering.
      *
      * @param Request $request
      * @return AnonymousResourceCollection
@@ -35,8 +35,8 @@ class ReportController extends Controller
         // 1. التحقق من الصلاحية
         $this->authorize('viewAny', Driver::class);
 
-        // 2. بناء الاستعلام الأساسي
-        $query = Driver::query();
+        // 2. بناء الاستعلام الأساسي مع تحميل علاقة الشاحنة
+        $query = Driver::with('truck');
 
         // 3. تطبيق الفلاتر المتقدمة
         // فلتر: الحالة (status)
@@ -44,30 +44,29 @@ class ReportController extends Controller
             $query->where('status', $request->input('status'));
         }
 
-        // --- بداية التعديل: إعادة هيكلة فلتر سقف الطلبيات ---
+        // فلتر: سقف الطلبيات
         if ($request->filled('order_limit')) {
             $limit = (int) $request->input('order_limit');
             $deliveredStatus = OrderStatus::where('name', 'Delivered')->first();
 
             if ($deliveredStatus) {
-                // استعلام فرعي لتحديد السائقين الذين يجب استبعادهم
-                // وهم الذين لديهم عدد طلبات غير مسلمة >= الحد المطلوب
                 $subquery = FuelOrder::select('driver_id')
                     ->where('order_status_id', '!=', $deliveredStatus->id)
                     ->groupBy('driver_id')
                     ->having(DB::raw('COUNT(id)'), '>=', $limit);
 
-                // استبعاد هؤلاء السائقين من الاستعلام الرئيسي
                 $query->whereNotIn('id', $subquery);
             }
         }
-        // --- نهاية التعديل ---
 
-        // 4. إرجاع النتائج مع Pagination
-         $drivers = $query->paginate(15)->withQueryString();
+        // 4. جلب كل النتائج المفلترة وترتيبها
+        // --- [تم التعديل هنا] ---
+        $drivers = $query->latest()->get();
+        // --- [نهاية التعديل] ---
 
         return DriverResource::collection($drivers);
     }
+
 
 
     /**
